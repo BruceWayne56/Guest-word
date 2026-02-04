@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 250, 250, 252;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 15, 23, 42;
+    --background-end-rgb: 30, 41, 59;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  min-height: 100vh;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Zhuyin display */
+.zhuyin-card {
+  @apply inline-flex items-center justify-center;
+  @apply px-4 py-3 rounded-xl;
+  @apply bg-gradient-to-br from-amber-100 to-amber-50;
+  @apply border-2 border-amber-300;
+  @apply shadow-lg;
+  @apply font-bold text-2xl text-amber-900;
+  @apply transition-transform hover:scale-105;
+}
+
+/* Role badges */
+.role-guesser {
+  @apply bg-purple-100 text-purple-800 border-purple-300;
+}
+
+.role-setter {
+  @apply bg-emerald-100 text-emerald-800 border-emerald-300;
+}
+
+.role-hinter {
+  @apply bg-blue-100 text-blue-800 border-blue-300;
+}

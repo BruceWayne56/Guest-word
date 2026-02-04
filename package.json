@@ -1,0 +1,19 @@
+{
+  "name": "guest-word",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev:server & npm run dev:web",
+    "dev:web": "npm run dev --workspace=web",
+    "dev:server": "npm run dev --workspace=server",
+    "build": "npm run build --workspaces",
+    "build:shared": "npm run build --workspace=@guest-word/shared"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}
