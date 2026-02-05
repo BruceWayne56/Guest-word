@@ -12,7 +12,8 @@ const httpServer = createServer(app);
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: true, // 允許所有來源（開發環境）
+  credentials: true,
 }));
 app.use(express.json());
 

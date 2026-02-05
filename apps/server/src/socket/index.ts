@@ -20,8 +20,9 @@ export function setupSocket(
     httpServer,
     {
       cors: {
-        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        origin: true, // 允許所有來源（開發環境）
         methods: ['GET', 'POST'],
+        credentials: true,
       },
       connectionStateRecovery: {
         maxDisconnectionDuration: 2 * 60 * 1000,

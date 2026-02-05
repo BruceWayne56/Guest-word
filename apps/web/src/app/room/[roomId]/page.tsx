@@ -85,13 +85,22 @@ export default function RoomPage() {
     });
 
     socket.on('game:phaseChanged', (phase) => {
-      if (gameState) {
-        setGameState({ ...gameState, phase });
+      const currentState = useGameStore.getState().gameState;
+      if (currentState) {
+        setGameState({ ...currentState, phase });
+      }
+      // 清除回合結束 modal
+      if (phase === 'WORD_SELECTION') {
+        setRoundSummary(null);
       }
     });
 
     socket.on('game:stateSync', (state) => {
       setGameState(state);
+      // 新回合開始時清除舊的回合摘要
+      if (state.phase === 'WORD_SELECTION') {
+        setRoundSummary(null);
+      }
     });
 
     socket.on('game:hintSubmitted', (hint) => {

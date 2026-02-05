@@ -41,7 +41,7 @@ interface GameStore {
   setMainWord: (word: string) => void;
   addHint: (hint: HintDisplay) => void;
   addGuess: (result: GuessResult) => void;
-  setRoundSummary: (summary: RoundSummary) => void;
+  setRoundSummary: (summary: RoundSummary | null) => void;
   setGameResult: (result: GameResult) => void;
   reset: () => void;
   resetGame: () => void;
@@ -121,11 +121,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
       (state.phase === 'HINT_PHASE' && myRole === 'HINTER') ||
       (state.phase === 'GUESS_PHASE' && myRole === 'GUESSER');
 
-    set({
-      gameState: state,
-      hints: state.hints,
-      isMyTurn,
-    });
+    // 新回合開始時重置相關狀態
+    if (state.phase === 'WORD_SELECTION') {
+      set({
+        gameState: state,
+        hints: state.hints,
+        guesses: [],
+        mainWord: null,
+        isMyTurn,
+      });
+    } else {
+      set({
+        gameState: state,
+        hints: state.hints,
+        isMyTurn,
+      });
+    }
   },
 
   setRoleAssignment: (roles) => {
