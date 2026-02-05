@@ -2,84 +2,74 @@
 
 多人中文猜字遊戲，使用注音提示。
 
-## 遊戲規則
-
-1. 3人以上參與：**猜字者**(1人)、**出題者**(1人)、**提示者**(其他人)
-2. 出題者選一個「主字」(如：川)
-3. 提示者輸入能與主字組成兩字詞的字(如：河 → 河川)
-4. 系統將提示字轉成**注音**顯示給猜字者(河 → ㄏㄜˊ)
-5. 猜字者根據注音猜出主字
-
-## 技術架構
+## 專案結構
 
 ```
 Guest-word/
 ├── apps/
-│   ├── web/          # Next.js 14 前端
-│   └── server/       # Express + Socket.IO 後端
+│   ├── web/          # Next.js 14 前端 (port 3000)
+│   └── server/       # Express + Socket.IO 後端 (port 3001)
 ├── packages/
 │   └── shared/       # 共用型別定義
-└── scripts/          # 工具腳本
 ```
 
-### 前端 (apps/web)
-- **框架**: Next.js 14 + TypeScript
-- **樣式**: Tailwind CSS
-- **狀態管理**: Zustand
-- **即時通訊**: Socket.IO Client
+**技術棧**: TypeScript, Next.js 14, Zustand, Express, Socket.IO, Tailwind CSS
 
-### 後端 (apps/server)
-- **框架**: Express + TypeScript
-- **即時通訊**: Socket.IO (房間管理)
-- **詞庫**: 萌典 86,850 個兩字詞
-- **注音轉換**: pinyin 套件
+## 遊戲規則
 
-### 核心服務 (apps/server/src/services/)
-| 服務 | 功能 |
-|------|------|
-| `roomService.ts` | 房間建立/加入/離開、玩家管理 |
-| `gameService.ts` | 遊戲流程、角色分配、計分 |
-| `wordService.ts` | 詞庫驗證(主字+提示字是否成詞) |
-| `zhuyinService.ts` | 中文轉注音 |
-
-## 遊戲流程
-
-```
-WAITING → ROLE_ASSIGNMENT → WORD_SELECTION → HINT_PHASE → GUESS_PHASE → ROUND_END
-                                                                            ↓
-                                                          (下一回合或 GAME_END)
-```
+1. 3+ 人參與：猜字者(1)、出題者(1)、提示者(N)
+2. 出題者選「主字」→ 提示者輸入能組成詞的字 → 系統轉注音 → 猜字者猜字
 
 ## 啟動方式
 
+### 本機開發
 ```bash
-# 安裝依賴
-npm install
-
-# 編譯共用型別
-npm run build:shared
-
-# 啟動後端 (localhost:3001)
-npm run dev:server
-
-# 啟動前端 (localhost:3000)
-npm run dev:web
+npm install && npm run build:shared
+npm run dev:server  # 終端 1
+npm run dev:web     # 終端 2
 ```
 
-## Socket 事件
+### Cloudflare Tunnel（外部連線）
+```bash
+# 終端 1: 後端
+npm run dev:server
 
-### 房間
-- `room:create` / `room:join` / `room:leave` / `room:ready`
+# 終端 2: 後端 Tunnel
+~/bin/cloudflared tunnel --url http://localhost:3001
+# → 記下 URL (如 https://xxx.trycloudflare.com)
 
-### 遊戲
-- `game:start` - 開始遊戲
-- `game:selectWord` - 出題者選字
-- `game:submitHint` - 提示者提交提示
-- `game:guess` - 猜字者猜字
+# 終端 3: 前端（用上面的 URL）
+cd apps/web && NEXT_PUBLIC_SOCKET_URL="https://xxx.trycloudflare.com" npx next dev
 
-## 待開發功能
+# 終端 4: 前端 Tunnel
+~/bin/cloudflared tunnel --url http://localhost:3000
+# → 這個 URL 分享給其他人
+```
 
-- [ ] 計時器
-- [ ] 斷線重連
+安裝 cloudflared: `curl -sL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o ~/bin/cloudflared && chmod +x ~/bin/cloudflared`
+
+## 核心檔案
+
+| 檔案 | 用途 |
+|------|------|
+| `apps/server/src/services/roomService.ts` | 房間/玩家管理 |
+| `apps/server/src/services/gameService.ts` | 遊戲流程、計分 |
+| `apps/server/src/services/wordService.ts` | 詞庫驗證 (86,850 詞) |
+| `apps/server/src/services/zhuyinService.ts` | 中文轉注音 |
+| `apps/server/src/socket/index.ts` | Socket 事件處理 |
+| `apps/web/src/stores/gameStore.ts` | 前端狀態管理 |
+| `apps/web/src/app/room/[roomId]/page.tsx` | 遊戲房間頁面 |
+
+## 待開發
+
+- [ ] 計時器（超時自動下一階段）
+- [ ] 斷線重連（遊戲狀態恢復）
 - [ ] 遊戲歷史記錄
-- [ ] 更完整的 UI/UX
+- [ ] Cloudflare 帳號固定域名
+
+## 更新紀錄
+
+### 2026-02-05
+- **修復** 回合結束後卡住問題（閉包 bug、modal 未清除、狀態未重置）
+- **改進** CORS 設定開放所有來源（開發用）
+- **新增** Cloudflare Tunnel 部署方式
